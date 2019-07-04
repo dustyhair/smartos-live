@@ -20,7 +20,7 @@
  *
  * CDDL HEADER END
  *
- * Copyright (c) 2013, Joyent, Inc. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  *
  * * *
  * Dump for shared stuff for this package.
@@ -55,7 +55,7 @@ var DB_DIR = '/var/imgadm';
 
 var VALID_COMPRESSIONS = ['none', 'bzip2', 'gzip', 'xz'];
 
-var VALID_SOURCE_TYPES = ['imgapi', 'dsapi', 'docker'];
+var VALID_SOURCE_TYPES = ['imgapi', 'docker'];
 
 
 var _versionCache = null;

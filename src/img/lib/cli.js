@@ -44,7 +44,6 @@ var fs = require('fs');
 var genUuid = require('node-uuid');
 var os = require('os');
 var path = require('path');
-var restify = require('restify');
 var rimraf = require('rimraf');
 var sprintf = require('extsprintf').sprintf;
 var tabula = require('tabula');
@@ -357,10 +356,6 @@ CLI.prototype.init = function init(opts, args, cb) {
                 level: 'warn'
             }
         ],
-        // TODO hack serializers until
-        // https://github.com/mcavage/node-restify/pull/501 is fixed
-        // serializers: bunyan.stdSerializers,
-        serializers: restify.bunyan.serializers,
         req_id: req_id
     });
     var IMGADM_LOG_LEVEL;
@@ -563,8 +558,8 @@ CLI.prototype.do_sources = function do_sources(subcmd, opts, args, cb) {
             + '#\n'
             + '#   URL TYPE [OPTIONS]\n'
             + '#\n'
-            + '# where "TYPE" is one of "imgapi" (the default), "docker", or\n'
-            + '# "dsapi" (deprecated); and where "OPTIONS" is the literal\n'
+            + '# where "TYPE" is one of "imgapi" (the default) or "docker";\n'
+            + '# and where "OPTIONS" is the literal\n'
             + '# string "insecure" to skip TLS server certificate checking\n'
             + '# for this source.\n'
             + '#\n'
@@ -753,8 +748,6 @@ CLI.prototype.do_sources.help = (
     + '    {{name}} sources -a https://images.joyent.com\n'
     + '    # Docker Hub\n'
     + '    {{name}} sources -a https://docker.io -t docker\n'
-    + '    # Legacy SDC 6.5 DSAPI (deprecated)\n'
-    + '    {{name}} sources -a https://datasets.joyent.com/datasets -t dsapi\n'
     /* END JSSTYLED */
 );
 CLI.prototype.do_sources.options = [
@@ -812,7 +805,7 @@ CLI.prototype.do_sources.options = [
         default: 'imgapi',
         helpArg: '<type>',
         help: 'The source type for an added source. One of "imgapi" (the '
-            + 'default), "docker", or "dsapi" (deprecated).'
+            + 'default) or "docker".'
     },
     {
         names: ['insecure', 'k'],
@@ -1047,7 +1040,7 @@ CLI.prototype.do_show = function do_show(subcmd, opts, args, cb) {
             cb(new errors.ImageNotFoundError(getOpts.arg));
             return;
         } else if (importInfo.manifest) {
-            // IMGAPI/DSAPI return the manifest with source.getImportInfo().
+            // IMGAPI returns the manifest with source.getImportInfo().
             console.log(JSON.stringify(importInfo.manifest, null, 2));
             cb();
             return;
@@ -1306,7 +1299,7 @@ CLI.prototype.do_delete.options = [
 
 
 /**
- * `imgadm import <uuid>` for imgapi/dsapi imports
+ * `imgadm import <uuid>` for imgapi imports
  * `imgadm import <repo>[:<tag>]` for docker imports
  */
 CLI.prototype.do_import = function do_import(subcmd, opts, args, cb) {
@@ -1324,6 +1317,12 @@ CLI.prototype.do_import = function do_import(subcmd, opts, args, cb) {
     var arg = args[0];
     var log = self.log;
     var zpool = opts.P || common.DEFAULT_ZPOOL;
+
+    // reload any configured sources, using this channel argument instead
+    if (opts.channel !== undefined) {
+        self.tool.channel = opts.channel;
+        self.tool.init();
+    }
 
     vasync.pipeline({arg: {}, funcs: [
         function validateArg(ctx, next) {
@@ -1373,6 +1372,7 @@ CLI.prototype.do_import = function do_import(subcmd, opts, args, cb) {
             if (opts.source) {
                 getOpts.sources = opts.source.map(function (s) {
                     return self.tool.sourceFromInfo({
+                        channel: opts.channel,
                         url: s,
                         type: 'imgapi'
                     });
@@ -1462,6 +1462,12 @@ CLI.prototype.do_import.help = (
     + '{{options}}'
 );
 CLI.prototype.do_import.options = [
+    {
+        names: ['channel', 'C'],
+        type: 'string',
+        help: 'The channel to import from. This overrides any channel '
+            + 'parameter that may be set in the source url.'
+    },
     {
         names: ['help', 'h'],
         type: 'bool',

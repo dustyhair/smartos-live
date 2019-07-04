@@ -20,10 +20,10 @@
  *
  * CDDL HEADER END
  *
- * Copyright (c) 2013, Joyent, Inc. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  *
  * * *
- * Here is how imgadm upgrade is intented to work:
+ * Here is how imgadm upgrade is intended to work:
  *
  * - The imgadm config (/var/imgadm/imgadm.conf) has a `upgradedToVer` string.
  * - On `imgadm.init()` we upgrade if necessary, as early as possible via
@@ -69,6 +69,52 @@ function verInfoFromVer(ver) {
 
 
 // ---- upgraders
+
+/**
+ * Upgrade imgadm to v4.0.0
+ *
+ * imgadm 3 -> imgadm 4 requires that we drop all DSAPI sources since it's
+ * no longer possible to communicate with DSAPI using the current version of
+ * sdc-clients.
+ */
+function upgradeTo400(tool, callback) {
+    var log = tool.log.child({upgrade: true, upgradeTo400: true}, true);
+
+    vasync.pipeline({funcs: [
+        function upgradeSources(_, next) {
+            if (!tool.config.sources) {
+                next();
+                return;
+            }
+
+            log.info({sources: tool.config.sources}, 'config.sources before');
+            var changed = false;
+            tool.config.sources.forEach(function (s) {
+                if (s.type == 'dsapi') {
+                    log.warn(
+                        'The dsapi source "%s" is no longer supported.', s.url);
+                    log.warn('Removing it from the sources configuration.');
+                    tool.config.sources.pop(s);
+                    changed = true;
+                }
+            });
+
+            if (changed) {
+                log.info({sources: tool.config.sources},
+                    'config.sources updated');
+                tool.saveConfig(next);
+            } else {
+                next();
+            }
+        },
+
+        function updateConfigVer(_, next) {
+            tool.config.upgradedToVer = '4.0.0';
+            tool.saveConfig(next);
+        }
+    ]}, callback);
+}
+
 
 /**
  * Upgrade imgadm to v3.0.0
@@ -284,7 +330,8 @@ function upgradeTo200(tool, callback) {
 
 var upgraders = [
     ['2.0.0', upgradeTo200],
-    ['3.0.0', upgradeTo300]
+    ['3.0.0', upgradeTo300],
+    ['4.0.0', upgradeTo400]
 ];
 var highestUpVer = upgraders[upgraders.length - 1][0];
 var highestUpVerInfo = verInfoFromVer(highestUpVer);

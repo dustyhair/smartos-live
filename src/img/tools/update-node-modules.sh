@@ -123,6 +123,8 @@ rm -rf node_modules/progbar/node_modules/readable-stream # only needed for node 
 
 rm -rf node_modules/imgmanifest/node_modules/assert-plus  # slight version mismatch
 rm -rf node_modules/imgmanifest/bin  # don't need this
+rm -rf node_modules/imgmanifest/deps/javascriptlint # developer-only stuff
+rm -rf node_modules/imgmanifest/deps/jsstyle # same.
 
 rm -rf node_modules/vasync/node_modules/verror # version mismatch
 
@@ -155,7 +157,7 @@ rm -rf node_modules/sdc-clients/node_modules/http-signature
 rm -rf node_modules/sdc-clients/node_modules/libuuid
 rm -rf node_modules/sdc-clients/node_modules/ufds
 rm -rf node_modules/sdc-clients/node_modules/ssh-agent/{bin,node_modules/posix-getopt}
-
+rm -rf node_modules/sdc-clients/node_modules/smartdc-auth
 # restify
 # - We just want the restify client.
 rm -rf node_modules/restify/lib/{formatters,plugins,request.js,response.js,router.js,server.js}
@@ -204,6 +206,35 @@ patch -p0 <<'PATCHRESTIFY'
 PATCHRESTIFY
 rm -rf node_modules/restify/lib/index.js.orig
 rm -rf node_modules/restify/lib/dtrace.js.orig
+
+patch -p0 <<'PATCHRESTIFYCLIENTS'
+--- node_modules/sdc-clients/node_modules/restify-clients/lib/helpers/dtrace.js.orig	2018-07-25 23:40:39.000000000 +0100
++++ node_modules/sdc-clients/node_modules/restify-clients/lib/helpers/dtrace.js	2019-07-01 17:30:14.000000000 +0100
+@@ -27,7 +27,8 @@
+ module.exports = (function exportStaticProvider() {
+     if (!PROVIDER) {
+         try {
+-            var dtrace = require('dtrace-provider');
++            // var dtrace = require('dtrace-provider');
++            var dtrace = require('/usr/node/node_modules/dtrace-provider');
+             PROVIDER = dtrace.createDTraceProvider('restify');
+         } catch (e) {
+             PROVIDER = {
+PATCHRESTIFYCLIENTS
+rm -rf node_modules/sdc-clients/node_modules/restify-clients/lib/helpers/dtrace.js.orig
+
+patch -p0 <<'PATCHSDCCLIENTS'
+--- node_modules/sdc-clients/lib/imgapi.js.orig	2019-07-02 10:22:28.000000000 +0100
++++ node_modules/sdc-clients/lib/imgapi.js	2019-07-02 10:22:38.000000000 +0100
+@@ -68,7 +68,6 @@
+ var restifyClients = require('restify-clients');
+ var mod_url = require('url');
+ var backoff = require('backoff');
+-var auth = require('smartdc-auth');
+ var sshpk = require('sshpk');
+
+
+PATCHSDCCLIENTS
 
 # tunnel-agent >=0.4.1
 # At the time of writing tunnel-agent.git has a fix we need for Docker Hub
@@ -365,8 +396,8 @@ patch -p0 <<'PATCHDRC'
 PATCHDRC
 rm -f node_modules/docker-registry-client/lib/*.js.orig
 # now remove un-needed restify-clients and restify-errors
-rm -f node_modules/docker-registry-client/node_modules/restify-clients
-rm -f node_modules/docker-registry-client/node_modules/restify-errors
+rm -rf node_modules/docker-registry-client/node_modules/restify-clients
+rm -rf node_modules/docker-registry-client/node_modules/restify-errors
 
 # Normalize all package.json's. Dropping fields that seem to
 # change willy-nilly from npm server-side.

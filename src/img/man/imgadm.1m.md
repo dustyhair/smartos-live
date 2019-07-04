@@ -42,6 +42,11 @@ The manifest is a JSON serialized description.
 The identifier for an image is its UUID. Most commands operate on images by
 UUID.
 
+Image API servers that support channels can be configured as sources by
+specifying URLs with the 'channel=<channel name>' parameter. The 'import'
+command also allows a '-C' argument to override all sources and use the
+supplied channel.
+
 
 ## OPTIONS
 
@@ -76,6 +81,9 @@ UUID.
         An image source is a URL to a server implementing the IMGAPI, or
         the Docker Registry API. The default IMGAPI is https://images.joyent.com
 
+        Image API server channels can be specified by including a
+        '?channel=<channel name>' parameter as part of the supplied <url>.
+
         Usage:
             imgadm sources [--verbose|-v] [--json|-j]  # list sources
             imgadm sources -a <url> [-t <type>]        # add a source
@@ -97,8 +105,7 @@ UUID.
             -c, --check               Ping check all sources.
 
             -t <type>, --type=<type>  The source type for an added source. One of
-                                      "imgapi" (the default), "docker", or "dsapi"
-                                      (deprecated).
+                                      "imgapi" (the default) or "docker".
             -k, --insecure            Allow insecure (no server certificate checking)
                                       access to the added HTTPS source URL.
             -f, --force               Force no "ping check" on new source URLs. By
@@ -111,8 +118,6 @@ UUID.
             imgadm sources -a https://images.joyent.com
             # Docker Hub
             imgadm sources -a https://docker.io -t docker
-            # Legacy SDC 6.5 DSAPI (deprecated)
-            imgadm sources -a https://datasets.joyent.com/datasets -t dsapi
 
     imgadm avail [<filters>]
 
@@ -167,8 +172,14 @@ UUID.
         Options:
             -h, --help                Show this help.
             -q, --quiet               Disable progress bar.
+            -C <channel>              Override the channel used for all sources
+                                      when looking for images.
             -P <pool>                 Name of zpool in which to look for the image.
                                       Default is "zones".
+            -S <url>                  Specify the URL from which to import the
+                                      image. The URL may include a '?channel='
+                                      parameter, but note that the -C argument,
+                                      if used, will take precedence.
 
 
     imgadm install [-P <pool>] -m <manifest> -f <file>

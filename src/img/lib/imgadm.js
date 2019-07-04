@@ -45,7 +45,6 @@ var child_process = require('child_process'),
     execFile = child_process.execFile,
     exec = child_process.exec;
 var crypto = require('crypto');
-var dsapi = require('sdc-clients/lib/dsapi');
 var EventEmitter = require('events').EventEmitter;
 var findit2 = require('findit2');
 var fs = require('fs');
@@ -405,11 +404,13 @@ function checkFileChecksum(opts, cb) {
 function IMGADM(options) {
     assert.object(options, 'options');
     assert.object(options.log, 'options.log');
+    assert.optionalString(options.channel, 'options.channel');
 
     this.log = options.log;
     this._manifestFromUuid = null;
     this.sources = null;
     this._db = new Database(options);
+    this.channel = options.channel;
 }
 
 IMGADM.prototype.init = function init(callback) {
@@ -447,6 +448,9 @@ IMGADM.prototype.init = function init(callback) {
         async.forEachSeries(
             sourcesInfo,
             function oneSource(sourceInfo, nextSource) {
+                if (self.channel !== undefined) {
+                    sourceInfo.channel = self.channel;
+                }
                 self._addSource(sourceInfo, true, nextSource);
             },
             function doneSources(err) {
@@ -498,6 +502,7 @@ IMGADM.prototype._addSource = function _addSource(
     assert.object(sourceInfo, 'sourceInfo');
     assert.string(sourceInfo.url, 'sourceInfo.url');
     assert.string(sourceInfo.type, 'sourceInfo.type');
+    assert.optionalString(sourceInfo.channel, 'sourceInfo.channel');
     assert.optionalBool(sourceInfo.insecure, 'sourceInfo.secure');
     assert.bool(skipPingCheck, 'skipPingCheck');
     assert.func(callback, 'callback');
@@ -508,7 +513,8 @@ IMGADM.prototype._addSource = function _addSource(
     for (var i = 0; i < self.sources.length; i++) {
         if (self.sources[i].normUrl === normUrl
             && self.sources[i].type === sourceInfo.type
-            && self.sources[i].insecure === sourceInfo.insecure)
+            && self.sources[i].insecure === sourceInfo.insecure
+            && self.sources[i].channel === sourceInfo.channel)
         {
             return callback(null, false, self.sources[i]);
         }
@@ -538,6 +544,7 @@ IMGADM.prototype.sourceFromInfo = function sourceFromInfo(sourceInfo) {
 
     return mod_sources.createSource(sourceInfo.type, {
         url: sourceInfo.url,
+        channel: sourceInfo.channel,
         insecure: sourceInfo.insecure,
         log: this.log,
         userAgent: this.userAgent,
@@ -1603,8 +1610,14 @@ IMGADM.prototype._importImage = function _importImage(opts, cb) {
         }
     };
 
-    logCb('Importing %s from "%s"',
-        source.titleFromImportInfo(opts.importInfo), source.url);
+    if (source.channel !== undefined) {
+        logCb('Importing %s from "%s", channel "%s"',
+            source.titleFromImportInfo(opts.importInfo), source.url,
+            source.channel);
+    } else {
+        logCb('Importing %s from "%s"',
+            source.titleFromImportInfo(opts.importInfo), source.url);
+    }
 
     var context = {};
     vasync.pipeline({arg: context, funcs: [

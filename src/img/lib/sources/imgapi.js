@@ -48,7 +48,7 @@ function ImgapiSource(opts) {
             if (self.log && self.log.fields && self.log.fields.req_id) {
                 headers['x-request-id'] = self.log.fields.req_id;
             }
-            this._client = imgapi.createClient({
+            var createOpts = {
                 url: self.normUrl,
                 version: '~2',
                 headers: headers,
@@ -56,7 +56,14 @@ function ImgapiSource(opts) {
                 rejectUnauthorized: (opts.insecure !== undefined ?
                     opts.insecure : process.env.IMGADM_INSECURE !== '1'),
                 userAgent: self.userAgent
-            });
+            };
+            // imgapi.createClient will use the 'channel' url parameter,
+            // or opts.channel, with the latter winning. Only set 'channel'
+            // if we've been given that option.
+            if (opts.channel !== undefined) {
+                createOpts.channel = opts.channel;
+            }
+            this._client = imgapi.createClient(createOpts);
         }
         return this._client;
     });
@@ -245,7 +252,6 @@ ImgapiSource.prototype.getImgAncestry = function getImgAncestry(opts, cb) {
         });
     }
 };
-
 
 
 /**

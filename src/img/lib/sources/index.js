@@ -20,12 +20,12 @@
  *
  * CDDL HEADER END
  *
- * Copyright (c) 2013, Joyent, Inc. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /**
  * Abstracted API for talking to different imgadm sources: imgapi,
- * dsapi (deprecated), docker (experimental).
+ * docker (experimental).
  */
 
 var p = console.log;
@@ -39,7 +39,6 @@ var errors = require('../errors');
 
 var Source = require('./source');
 var DockerSource = require('./docker');
-var DsapiSource = require('./dsapi');
 var ImgapiSource = require('./imgapi');
 
 
@@ -61,7 +60,9 @@ function createSource(type, opts) {
         source = new DockerSource(opts);
         break;
     case 'dsapi':
-        source = new DsapiSource(opts);
+        // intentionally doing nothing here. upgrade.js will remove any
+        // old dsapi sources from the configuration when it runs, persisting
+        // the configuration.
         break;
     default:
         throw new Error(format('invalid source type: "%s"', type));
