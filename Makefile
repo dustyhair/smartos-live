@@ -342,9 +342,7 @@ update-base:
 
 $(STAMPFILE):
 	mkdir -p $(ROOT)/proto
-	if [[ -z $$BUILDSTAMP ]]; then \
-	    BUILDSTAMP=$$(TZ=UTC date "+%Y%m%dT%H%M%SZ"); \
-	fi ; \
+	BUILDSTAMP=TESTING ; \
 	echo "$$BUILDSTAMP" >$(STAMPFILE)
 
 0-illumos-stamp: 0-strap-stamp $(STAMPFILE)
