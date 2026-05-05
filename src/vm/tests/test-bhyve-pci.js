@@ -118,6 +118,25 @@ test('test validate with ppt device node', function (t) {
     });
 });
 
+test('test validate with lofs filesystem', function (t) {
+    payload.filesystems = [
+        {
+            type: 'lofs',
+            source: '/tmp',
+            target: '/zones/build',
+            options: ['ro']
+        }
+    ];
+
+    VM.validate(payload.brand, 'create', payload, function (errors) {
+        delete payload.filesystems;
+
+        t.ok(!errors, 'valid bhyve lofs filesystem'
+            + (errors ? ': ' + JSON.stringify(errors) : ''));
+        t.end();
+    });
+});
+
 test('test validate with bad pci_slot', function (t) {
     validate_bad_value(t, 'pci_slot', [
         {
