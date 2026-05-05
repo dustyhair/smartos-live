@@ -100,10 +100,11 @@ test('test validate with bad pci_device path', function (t) {
     ]);
 });
 
-test('test validate with ppt device path', function (t) {
+test('test validate with ppt device node', function (t) {
     payload.pci_devices = [
         {
-            path: '/dev/ppt0',
+            path: '/devices/pci@0,0/pci8086,c09@1,2/display@0:ppt',
+            pptdev: '/dev/ppt0',
             pci_slot: '5:0:0',
             rom: '/zones/build/gpu.rom',
             rom_exec: false
@@ -122,6 +123,16 @@ test('test validate with bad pci_slot', function (t) {
         {
             path: '/devices/pci@0,0/pci8086,6f0a@3,2/pci15d9,1528@9,1',
             pci_slot: 'foo'
+        }
+    ]);
+});
+
+test('test validate with bad pptdev', function (t) {
+    validate_bad_value(t, 'pptdev', [
+        {
+            path: '/devices/pci@0,0/pci8086,c09@1,2/display@0:ppt',
+            pptdev: '/notppt0',
+            pci_slot: '5:0:0'
         }
     ]);
 });
