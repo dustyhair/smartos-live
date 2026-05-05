@@ -118,6 +118,20 @@ test('test validate with ppt device node', function (t) {
     });
 });
 
+test('test validate remove pci_device path with commas', function (t) {
+    var update = {
+        remove_pci_devices: [
+            '/devices/pci@0,0/pci8086,c09@1,2/pci1462,3715@0,3:ppt'
+        ]
+    };
+
+    VM.validate(payload.brand, 'update', update, function (errors) {
+        t.ok(!errors, 'valid remove_pci_devices path'
+            + (errors ? ': ' + JSON.stringify(errors) : ''));
+        t.end();
+    });
+});
+
 test('test validate with lofs filesystem', function (t) {
     payload.filesystems = [
         {
