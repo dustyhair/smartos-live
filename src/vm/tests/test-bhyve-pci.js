@@ -100,6 +100,23 @@ test('test validate with bad pci_device path', function (t) {
     ]);
 });
 
+test('test validate with ppt device path', function (t) {
+    payload.pci_devices = [
+        {
+            path: '/dev/ppt0',
+            pci_slot: '5:0:0',
+            rom: '/zones/build/gpu.rom',
+            rom_exec: false
+        }
+    ];
+
+    VM.validate(payload.brand, 'create', payload, function (errors) {
+        t.ok(!errors, 'valid /dev/ppt payload'
+            + (errors ? ': ' + JSON.stringify(errors) : ''));
+        t.end();
+    });
+});
+
 test('test validate with bad pci_slot', function (t) {
     validate_bad_value(t, 'pci_slot', [
         {
@@ -165,6 +182,16 @@ test('test validate with bad model)', function (t) {
     ]);
 });
 
+test('test validate with bad ROM path', function (t) {
+    validate_bad_value(t, 'rom', [
+        {
+            path: '/devices/pci@0,0/pci8086,6f0a@3,2/pci15d9,1528@9,1',
+            pci_slot: '4:0:0',
+            rom: 'relative.rom'
+        }
+    ]);
+});
+
 test('test validate with missing path', function (t) {
     validate_missing_property(t, 'path', [
         {
@@ -177,6 +204,16 @@ test('test validate with missing pci_slot', function (t) {
     validate_missing_property(t, 'pci_slot', [
         {
             path: '/devices/pci@0,0/pci8086,6f0a@3,2/pci15d9,1528@9,1'
+        }
+    ]);
+});
+
+test('test validate with rom_exec missing ROM', function (t) {
+    validate_missing_property(t, 'rom', [
+        {
+            path: '/devices/pci@0,0/pci8086,6f0a@3,2/pci15d9,1528@9,1',
+            pci_slot: '4:0:0',
+            rom_exec: false
         }
     ]);
 });
