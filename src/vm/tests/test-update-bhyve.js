@@ -163,6 +163,7 @@ var simple_properties = [
     ['alias', 'useless VM'],
     ['billing_id', '9.99'],
     ['bhyve_hostbridge', 'q35'],
+    ['bhyve_tpm', 'swtpm,/var/run/swtpm-test.sock,version=2.0'],
     ['virtio1', true],
     ['hostname', 'hamburgerhelper'],
     ['owner_uuid', '36bf401a-28ef-11e1-b4a7-c344deb1a5d6'],

@@ -649,6 +649,20 @@ tab-complete UUIDs rather than having to type them out for every command.
         create: yes
         update: yes
 
+    bhyve_tpm:
+
+        This configures a bhyve TPM device. The value is passed to bhyve as
+        the TPM LPC device argument after the leading `tpm,`. For a software
+        TPM, use `swtpm,<socket>[,version=2.0]`, where `<socket>` is the UNIX
+        domain socket for a running swtpm instance. For a host TPM, use
+        `passthru,<device>[,version=2.0]`.
+
+        type: string
+        vmtype: bhyve
+        listable: no
+        create: yes
+        update: yes
+
     boot:
 
         This option allows you to set the boot order for KVM VMs. The format is
@@ -2811,4 +2825,3 @@ Some of the vmadm commands depend on the vmadmd(8) service:
 If the vmadmd service is stopped while the vmadm utility is running, the vmadm
 command behaviour will be undefined. Additionally if the service is not
 running, some commands will be unavailable.
-
