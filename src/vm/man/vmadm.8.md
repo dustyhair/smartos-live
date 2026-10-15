@@ -1021,13 +1021,16 @@ tab-complete UUIDs rather than having to type them out for every command.
 
     disks.*.size:
 
-        Size of disk in MiB. You should only specify this parameter if you've
-        not included the image_* parameters. It will show up in get requests
-        for all disks whether you've specified or not as a means to determine
-        the size of the zvol.
+        Size of disk in MiB. It will show up in get requests for all disks
+        whether you've specified or not as a means to determine the size of
+        the zvol.
 
-        Important: size is required when you don't include image_uuid for a disk
-        and not allowed when you do.
+        Important: size is required when you don't include image_uuid for a
+        disk. When you do include image_uuid, size is optional: without it the
+        disk is the size of the image, and with it the disk is created that
+        size, which must be at least the size of the image. Whether the guest
+        uses the extra space is up to the guest (for example, cloud-init can
+        grow its root filesystem to fill the disk).
 
         type: integer (size in MiB)
         vmtype: HVM
@@ -2125,6 +2128,21 @@ tab-complete UUIDs rather than having to type them out for every command.
         create: yes
         update: yes
         default: 'std'
+
+    virtio1:
+
+	Enables or disables the presentation of virtio 1.0 devices in the
+	transitional driver to a bhyve guest. Some guests have drivers that
+	do not support the transitional (both 0.9 and 1.0) interface for 0.9
+	devices due to guest driver bugs, so if this property is missing from
+	an existing VM object it will be false. Newly created VMs will set
+	this to true, unless the creation payload specifies it to be false.
+
+	type: boolean
+	vmtype: bhyve
+	listable: yes
+	create: yes
+	update: yes
 
     virtio_txburst:
 
