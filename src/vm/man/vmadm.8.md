@@ -1391,6 +1391,61 @@ tab-complete UUIDs rather than having to type them out for every command.
         update: yes
         OS default: "default"
 
+    lx_private_network:
+
+        Enables a host-routed private network for Linux network namespaces in
+        an LX VM. The LX brand creates a private etherstub, a host gateway and
+        a bounded pool of links before the VM boots. The links are returned to
+        the pool when a network namespace exits. Host runtime state is removed
+        when the VM stops.
+
+        lx_private_network_egress and lx_private_network_subnet are required
+        when this property is true. Private network properties can only be
+        changed while the VM is stopped.
+
+        type: boolean
+        vmtype: lx
+        listable: no
+        create: yes
+        update: yes
+        default: false
+
+    lx_private_network_egress:
+
+        The global-zone datalink used for routed and source-NAT traffic from
+        the LX private network.
+
+        type: string (datalink name)
+        vmtype: lx
+        listable: no
+        create: yes
+        update: yes
+
+    lx_private_network_links:
+
+        The number of links available for concurrent private Linux network
+        namespaces. Valid values are 1 through 32. If omitted, the LX brand
+        creates four links.
+
+        type: integer
+        vmtype: lx
+        listable: no
+        create: yes
+        update: yes
+        default: 4
+
+    lx_private_network_subnet:
+
+        An RFC 1918 IPv4 /24 used by the private network. The network address
+        must end in .0/24. The host gateway uses .1 and namespace links begin
+        at .2.
+
+        type: string (IPv4 CIDR)
+        vmtype: lx
+        listable: no
+        create: yes
+        update: yes
+
     maintain_resolvers:
 
         If set, the resolvers in /etc/resolv.conf inside the VM will be updated

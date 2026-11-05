@@ -120,6 +120,7 @@ JS_CHECK_TARGETS=\
 	vm/tests/test-hrtime.js \
 	vm/tests/test-indestructible.js \
 	vm/tests/test-internal_metadata_namespaces.js \
+	vm/tests/test-lx-private-network.js \
 	vm/tests/test-info.js \
 	vm/tests/test-lastexited.js \
 	vm/tests/test-openonerrlogger.js \
