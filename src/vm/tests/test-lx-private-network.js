@@ -12,7 +12,7 @@
 
 /* Validate the vmadm properties used by the LX private-network lifecycle. */
 
-var VM = require('/usr/vm/node_modules/VM');
+var VM = require('../node_modules/VM');
 var vmtest = require('../common/vmtest.js');
 
 /* jsl:import ../node_modules/nodeunit-plus/index.js */
@@ -26,7 +26,7 @@ function lxPayload()
         kernel_version: '5.10.0',
         lx_private_network: true,
         lx_private_network_egress: 'admin0',
-        lx_private_network_links: 4,
+        lx_private_network_links: 1,
         lx_private_network_subnet: '10.88.0.0/24'
     };
 }

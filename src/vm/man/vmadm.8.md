@@ -1391,13 +1391,40 @@ tab-complete UUIDs rather than having to type them out for every command.
         update: yes
         OS default: "default"
 
-    lx_private_network:
+    lx_private_network (EXPERIMENTAL):
 
         Enables a host-routed private network for Linux network namespaces in
         an LX VM. The LX brand creates a private etherstub, a host gateway and
-        a bounded pool of links before the VM boots. The links are returned to
-        the pool when a network namespace exits. Host runtime state is removed
-        when the VM stops.
+        a bounded pool of links before the VM boots. Host runtime state is
+        removed when the VM stops.
+
+        This feature does not enable host-wide prerequisites. The global zone
+        administrator must enable IPv4 forwarding, IP Filter, and the seccomp,
+        userns, mntns, pidns, ipcns, and netns LX experimental gates before
+        starting the VM. The brand hook checks these settings and fails the
+        start if one is missing. It never changes or restores global kernel or
+        network settings.
+
+        Configure the experimental gates in `/etc/system`, then reboot the
+        host:
+
+            set lx_brand:lx_seccomp_experimental=1
+            set lx_brand:lx_userns_experimental=1
+            set lx_brand:lx_mntns_experimental=1
+            set lx_brand:lx_pidns_experimental=1
+            set lx_brand:lx_ipcns_experimental=1
+            set lx_brand:lx_netns_experimental=1
+
+        Enable forwarding and IP Filter through the normal host interfaces:
+
+            ipadm set-prop -p forwarding=on ipv4
+            svcadm enable svc:/network/ipfilter:default
+
+        Current LX kernels have a host MAC polling race when one VNIC-backed
+        network namespace is created while another is being destroyed. The
+        lx-netns-tools guest launcher serializes its own calls as a temporary
+        mitigation, but a guest can bypass that launcher. Do not treat this
+        feature as a host isolation boundary until the kernel race is fixed.
 
         lx_private_network_egress and lx_private_network_subnet are required
         when this property is true. Private network properties can only be
@@ -1423,16 +1450,17 @@ tab-complete UUIDs rather than having to type them out for every command.
 
     lx_private_network_links:
 
-        The number of links available for concurrent private Linux network
-        namespaces. Valid values are 1 through 32. If omitted, the LX brand
-        creates four links.
+        The number of links reserved for private Linux network namespaces.
+        Valid values are 1 through 32. The current guest launcher serializes
+        networked sandboxes because of the kernel race described above, so
+        values above one are reserved for testing and future use.
 
         type: integer
         vmtype: lx
         listable: no
         create: yes
         update: yes
-        default: 4
+        default: 1
 
     lx_private_network_subnet:
 
