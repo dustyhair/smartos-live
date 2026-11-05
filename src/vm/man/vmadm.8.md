@@ -1420,11 +1420,11 @@ tab-complete UUIDs rather than having to type them out for every command.
             ipadm set-prop -p forwarding=on ipv4
             svcadm enable svc:/network/ipfilter:default
 
-        Current LX kernels have a host MAC polling race when one VNIC-backed
-        network namespace is created while another is being destroyed. The
-        lx-netns-tools guest launcher serializes its own calls as a temporary
-        mitigation, but a guest can bypass that launcher. Do not treat this
-        feature as a host isolation boundary until the kernel race is fixed.
+        Use a SmartOS platform that includes the LX detached-network-stack
+        concurrency fixes. Older platforms can panic if one VNIC-backed
+        network namespace starts while another is being destroyed. The
+        lx-netns-tools guest launcher serializes its own calls, but a guest can
+        bypass the launcher.
 
         lx_private_network_egress and lx_private_network_subnet are required
         when this property is true. Private network properties can only be
@@ -1451,9 +1451,10 @@ tab-complete UUIDs rather than having to type them out for every command.
     lx_private_network_links:
 
         The number of links reserved for private Linux network namespaces.
-        Valid values are 1 through 32. The current guest launcher serializes
-        networked sandboxes because of the kernel race described above, so
-        values above one are reserved for testing and future use.
+        Valid values are 1 through 32. lx-netns-tools 0.1.4 serializes
+        networked sandboxes within one LX VM and therefore uses one link at a
+        time. Additional links support other namespace managers and future
+        lx-netns-tools releases.
 
         type: integer
         vmtype: lx
