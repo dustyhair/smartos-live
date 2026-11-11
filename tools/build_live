@@ -13,7 +13,7 @@
 #
 # Copyright 2021 Joyent, Inc.
 # Copyright 2025 MNX Cloud, Inc.
-# Copyright 2025 Edgecast Cloud LLC.
+# Copyright 2026 Edgecast Cloud LLC.
 #
 
 #
@@ -790,7 +790,7 @@ bi_setup_work_dir
 # Create and mount the "/" (root) ramdisk image:
 #
 bi_file_root="$bi_tmpdir/root.image"
-bi_root_size=350000
+bi_root_size=360000
 if strings "$bi_wsroot/proto/kernel/amd64/genunix" |
     grep "DEBUG enabled" >/dev/null; then
 	#
@@ -815,7 +815,7 @@ fi
 # Create and mount the "/usr" ramdisk image:
 #
 bi_file_usr="$bi_tmpdir/usr.image"
-bi_create_ramdisk 448000 "$bi_file_usr"
+bi_create_ramdisk 460000 "$bi_file_usr"
 bi_lofi_usr="$bi_lofi_last"
 bi_create_ufs 14000 "$bi_lofi_usr" "$bi_mnt_usr" "/usr"
 
