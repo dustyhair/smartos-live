@@ -72,7 +72,7 @@ function get_status
 	fi
 	printf '  '
 
-	if [[ ! -d .git ]]; then
+	if [[ ! -e .git ]]; then
 		#
 		# This means that we have a local project that isn't a git
 		# directory.  Yay team. In this case we just give them a date

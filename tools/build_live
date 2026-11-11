@@ -533,6 +533,7 @@ function bi_file_fixups
 	# Now, unmount /usr
 	#
 	if ! pfexec /sbin/umount "$bi_mnt_usr"; then
+		pfexec /usr/sbin/fuser -cu "$bi_mnt_usr" >&2 || true
 		fail "could not unmount /usr image"
 	fi
 	bi_mnt_usr=
